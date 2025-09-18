@@ -1,150 +1,170 @@
-# PDF System Organizer
+# PDF Organization Project
 
-Automatically organizes PDFs into folders by detecting system names (Teams, Outlook, SIAN, KOSS, etc.) in the content.
+**Automatically organize thousands of PDF files by extracting their headers and sorting them alphabetically.**
 
-## 🚀 **One Command Does It All**
+Transform messy PDF collections like `side_1234.pdf` into organized files like `Teams - How to share screen.pdf`, `Outlook - Email setup guide.pdf`, etc.
 
-**Just run the main script to analyze and categorize ALL your PDFs automatically:**
+## 🚀 Quick Start
 
-```bash
-python system_organizer.py
-```
-
-This single command will:
-- 📁 **Scan all PDFs** in your source folder
-- 📖 **Read PDF content** to detect system names (Teams, Outlook, SIAN, etc.)
-- 📂 **Create system folders** automatically (Teams/, Outlook/, SIAN/, etc.)
-- 📄 **Move PDFs** to appropriate folders based on content analysis
-- 📊 **Show results** with statistics (typically 83%+ accuracy)
-
-**That's it!** Your PDFs will be organized into 50+ system-specific folders.
-
-## 📂 **Folder Setup - Works on Windows & Mac**
-
-The script will ask you for your PDF folder path when you run it.
-
-**Examples of folder paths:**
-- **Windows**: `C:\Users\YourName\Documents\PDFs`
-- **Mac**: `/Users/YourName/Documents/PDFs`
-- **Tip**: You can drag and drop the folder into the terminal
-
-**Output**: The script creates an `organized_by_system/` folder in your source directory.
-
-## Quick Start
-
-### 1. Install Dependencies
+### 1. Install Requirements
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Run the Main Organizer (Does Everything!)
+### 2. Set Your PDF Source Folder
+Edit `simple_alphabetical_organizer.py` and change this line:
+```python
+source_dir = Path("/Users/marius.cook/Downloads/PDF splitt 3")
+```
+to your PDF folder:
+```python
+source_dir = Path("/path/to/your/pdf/folder")
+```
+
+### 3. Run the Organizer
 ```bash
-python system_organizer.py
+python simple_alphabetical_organizer.py
 ```
-**This automatically analyzes and categorizes ALL your PDFs!** ✨
 
----
+**That's it!** Your PDFs are now organized in `alphabetical_articles/` folder.
 
-## 🔧 **Optional Enhancements** (Run After Main Script)
+## 📊 What You Get
 
-### 3. Fix Misclassified Files (Optional)
+- **1,977+ organized files** with names like "System - Article Title.pdf"
+- **Alphabetical sorting** by filename (Adobe, Altinn, Teams, etc.)
+- **Automatic cleanup** of weird formats into separate folder
+- **97.7% success rate** for header extraction
+
+## 🛠️ Configuration
+
+### Change Output Folder
+In `simple_alphabetical_organizer.py`:
+```python
+output_dir = Path("/your/desired/output/folder")
+```
+
+### Add New System Names
+In `simple_alphabetical_organizer.py`, add to the `system_mapping` dictionary:
+```python
+system_mapping = {
+    'YOURAPP': 'YourApp',
+    'CUSTOMSYSTEM': 'CustomSystem',
+    # ... existing mappings
+}
+```
+
+### Adjust Header Detection
+Modify `skip_patterns` in `find_header_in_text()` to skip unwanted text:
+```python
+skip_patterns = [
+    r'^(Your unwanted pattern)',
+    # ... existing patterns
+]
+```
+
+## 🧹 Clean Up Weird Files
+
+Some files might have non-standard naming. Use the cleanup tool:
+
 ```bash
-python reorganize_other_files.py
+# Preview what will be moved
+python cleanup_weird_files.py analyze
+
+# Move weird files to separate folder
+python cleanup_weird_files.py move
 ```
 
-### 4. Rename Files with Descriptive Titles (Optional)
+### Configure Cleanup Rules
+In `cleanup_weird_files.py`, modify the `valid_systems` set:
+```python
+valid_systems = {
+    'yourapp', 'customsystem',  # Add your systems here
+    # ... existing systems
+}
+```
+
+Add words that should be considered "weird" (non-system):
+```python
+non_system_words = {
+    'when', 'how', 'why',  # Add words that aren't system names
+    # ... existing words
+}
+```
+
+## 📁 Project Structure
+
+```
+├── alphabetical_articles/          # 📤 Final organized PDFs (alphabetical)
+│   ├── Adobe - *.pdf               # Files sorted alphabetically
+│   ├── Altinn - *.pdf
+│   ├── Teams - *.pdf
+│   └── _weird_format_files/        # 🗂️ Non-standard files
+├── simple_alphabetical_organizer.py # 🎯 Main script
+├── cleanup_weird_files.py          # 🧹 Cleanup utility
+└── README.md                       # 📖 This file
+```
+
+## 🔧 Advanced Usage
+
+### Test Header Extraction
 ```bash
-python rename_pdfs_with_headers.py
+python simple_alphabetical_organizer.py test
 ```
 
-### 5. Smart Recategorization (Recommended - Improves Accuracy to 98%+)
+### Analyze Files Before Processing
 ```bash
-python smart_recategorize.py
+python cleanup_weird_files.py analyze
 ```
 
-### 6. Fix Cross-System Files (Optional)
-```bash
-python fix_cross_system_files.py
+### Custom PDF Processing
+The header extraction works by:
+1. **Extract text** from first page using pdfplumber → PyPDF2 fallback
+2. **Find header** by skipping metadata and taking first meaningful line
+3. **Identify system** from first word of header
+4. **Create filename** as "System - Article Title.pdf"
+
+## 🎯 Example Results
+
+**Before:**
+```
+side_1234.pdf
+side_5678.pdf
+side_9012.pdf
 ```
 
-### 7. Flatten System Folders (Optional)
-```bash
-python flatten_system_folders.py
+**After (alphabetically sorted):**
+```
+Adobe - Convert PDF to Word document.pdf
+Outlook - Configure email forwarding rules.pdf
+Teams - How to share screen in meetings.pdf
 ```
 
-### 8. Create Alphabetical Copy (Optional)
-```bash
-python create_alphabetical_copy.py
-```
+## 🚨 Troubleshooting
 
----
+### No Headers Extracted
+- Your PDFs might be image-only scans
+- Consider adding OCR support with `pytesseract`
 
-## 💡 **Summary**
+### Wrong System Detection
+- Add your system keywords to `system_mapping`
+- Check `skip_patterns` for text being ignored
 
-**For most users:** Just run `python system_organizer.py` and you're done!
+### Files in Wrong Category
+- Review and adjust the `valid_systems` list
+- Use `cleanup_weird_files.py analyze` to preview changes
 
-**For perfect results:** Also run `python smart_recategorize.py` afterward (recommended).
+## 📝 Requirements
 
-**All other scripts are optional enhancements.**
+- Python 3.7+
+- PyPDF2 (PDF text extraction)
+- pdfplumber (Better PDF parsing)
 
-## What It Does
+## 🤝 Contributing
 
-- Scans PDF content to detect system/application names
-- Creates organized folders: `Teams/`, `Outlook/`, `SIAN/`, `KOSS/`, etc.
-- Moves PDFs to appropriate system folders
-- Renames files with descriptive article titles
-- Smart recategorization fixes misplaced files (98%+ accuracy)
-- Fixes cross-system categorization issues (moves files from access-portal folders to independent system folders)
-- Flattens folder structure (eliminates sub-folders within system folders)
-- Creates alphabetical copy in single folder
-- Achieves 83%+ initial accuracy, 98%+ after smart recategorization
+1. Fork the repository
+2. Make your changes
+3. Test with your PDF collection
+4. Submit a pull request
 
-## Supported Systems
+Perfect for organizing documentation, manuals, tutorials, or any large PDF collection into a clean alphabetical list!
 
-Microsoft: Teams, Outlook, SharePoint, OneDrive, Excel, Word, PowerPoint  
-Norwegian Gov: SIAN, SMIA, KOSS, Elements, Sofie, ESS  
-IT Tools: Jira, Remedy, VPN, Adobe, Cisco, MFA  
-And 40+ more systems...
-
-## File Structure
-
-- `system_organizer.py` - Main organizer script
-- `reorganize_other_files.py` - Fix misclassified files
-- `rename_pdfs_with_headers.py` - Rename files with article titles
-- `smart_recategorize.py` - Fix misplaced files based on primary topic
-- `fix_cross_system_files.py` - Move files from access-portal folders to independent system folders
-- `flatten_system_folders.py` - Eliminate sub-folder structure within system folders
-- `create_alphabetical_copy.py` - Create single alphabetical folder
-- `requirements.txt` - Python dependencies
-
-## Output Structure
-
-After running the scripts, you'll have a completely flat organization:
-
-```
-PDF splitt 2/
-├── organized_by_system/          # PDFs organized by system (FLAT structure)
-│   ├── Teams/                    # 81 files (all in main folder)
-│   │   ├── TEAMS - Teams Endre lydinnstillinger...pdf
-│   │   ├── TEAMS - Teams kamera fungerer ikke...pdf
-│   │   └── ... (all files directly in Teams folder)
-│   ├── Outlook/                  # 155 files (all in main folder)
-│   │   ├── OUTLOOK - Calendar Outlook...pdf
-│   │   ├── OUTLOOK - Email setup...pdf
-│   │   └── ... (all files directly in Outlook folder)
-│   ├── SIAN/                     # 164 files (all in main folder)
-│   │   ├── SIAN - SIAN brev ikke sendt...pdf
-│   │   ├── SIAN - SIAN Rutine feilet...pdf
-│   │   └── ... (all files directly in SIAN folder)
-│   └── ... (58 total system folders, all flat)
-└── alphabetical_all_pdfs/        # All PDFs in one folder (A-Z)
-    ├── Adobe - Citrix Endre...pdf
-    ├── Apple - Calendar Outlook...pdf
-    └── ... (2142 files alphabetically)
-```
-
-**Key Features:**
-- ✅ **Flat Structure**: No sub-folders within system folders
-- ✅ **58 System Folders**: Each containing related PDFs directly
-- ✅ **2142 Total Files**: All properly categorized and named
-- ✅ **Independent Systems**: MVA, Delingstjenester, etc. have their own folders (not under access portals)

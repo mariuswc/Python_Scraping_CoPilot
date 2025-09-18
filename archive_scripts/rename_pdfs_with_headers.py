@@ -16,43 +16,125 @@ def clean_filename(text: str) -> str:
     if not text:
         return "Untitled"
     
-    # Take first meaningful part (usually the title)
-    lines = text.split('\n')
-    title = ""
+    # This is now the extracted title, so we just need to clean it
+    # Remove invalid filename characters
+    text = re.sub(r'[<>:"/\\|?*]', '', text)
     
-    for line in lines:
-        line = line.strip()
-        # Skip empty lines, dates, and system names at start
-        if (len(line) > 10 and 
-            not re.match(r'^\d{2}\.\d{2}\.\d{4}', line) and  # Skip dates
-            not re.match(r'^(SIAN|SMIA|KOSS|Teams|Outlook)', line.upper()) and  # Skip system names alone
-            not line.lower().startswith('sist oppdatert')):
-            title = line
-            break
+    # Replace multiple spaces with single space
+    text = re.sub(r'\s+', ' ', text)
     
-    if not title:
-        # If no good title found, use first substantial line
-        for line in lines:
-            if len(line.strip()) > 5:
-                title = line.strip()
-                break
-    
-    if not title:
-        return "Untitled"
-    
-    # Clean the title for filename use
-    # Remove or replace invalid filename characters
-    title = re.sub(r'[<>:"/\\|?*]', '', title)  # Remove invalid chars
-    title = re.sub(r'\s+', ' ', title)  # Multiple spaces to single
-    title = title.strip()
-    
-    # Limit length and ensure it's not empty
-    title = title[:100] if title else "Untitled"
+    # Remove leading/trailing whitespace
+    text = text.strip()
     
     # Remove trailing dots (problematic on Windows)
-    title = title.rstrip('.')
+    text = text.rstrip('.')
     
-    return title if title else "Untitled"
+    # Limit length
+    if len(text) > 80:
+        text = text[:80].rsplit(' ', 1)[0]  # Cut at word boundary
+    
+    return text if text else "Untitled"
+
+def extract_article_title(pdf_path: Path) -> str:
+    """Extract the actual article title from a PDF"""
+    
+    try:
+        # Try pdfplumber first for better text extraction
+        import pdfplumber
+        with pdfplumber.open(pdf_path) as pdf:
+            if pdf.pages:
+                first_page = pdf.pages[0]
+                text = first_page.extract_text()
+                
+                if text:
+                    return find_title_in_text(text)
+    except Exception as e:
+        print(f"pdfplumber failed for {pdf_path.name}: {e}")
+    
+    try:
+        # Fallback to PyPDF2
+        import PyPDF2
+        with open(pdf_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            if reader.pages:
+                page = reader.pages[0]
+                text = page.extract_text()
+                
+                if text:
+                    return find_title_in_text(text)
+    except Exception as e:
+        print(f"PyPDF2 failed for {pdf_path.name}: {e}")
+    
+    return "Untitled"
+
+def find_title_in_text(text: str) -> str:
+    """Find the actual article title in the extracted text"""
+    lines = text.split('\n')
+    cleaned_lines = [line.strip() for line in lines if line.strip()]
+    
+    # Look for common title patterns
+    for i, line in enumerate(cleaned_lines):
+        line_clean = line.strip()
+        
+        # Skip very short lines (less than 3 chars)
+        if len(line_clean) < 3:
+            continue
+            
+        # Skip dates (dd.mm.yyyy format)
+        if re.match(r'^\d{2}\.\d{2}\.\d{4}', line_clean):
+            continue
+            
+        # Skip time stamps
+        if re.match(r'^\d{2}:\d{2}', line_clean):
+            continue
+            
+        # Skip "Sist oppdatert" lines
+        if line_clean.lower().startswith('sist oppdatert'):
+            continue
+            
+        # Skip pure system names as standalone titles
+        if line_clean.upper() in ['TEAMS', 'OUTLOOK', 'SIAN', 'SMIA', 'KOSS', 'SHAREPOINT', 'ONEDRIVE']:
+            continue
+            
+        # Skip URLs
+        if 'http' in line_clean.lower() or 'www.' in line_clean.lower():
+            continue
+            
+        # Skip lines that are just numbers or codes
+        if re.match(r'^[\d\.\-\s]+$', line_clean):
+            continue
+            
+        # Skip very long lines (likely descriptions, not titles)
+        if len(line_clean) > 80:
+            continue
+            
+        # Look for title patterns - usually appear early in document
+        # and are not too long, not too short
+        if 5 <= len(line_clean) <= 60:
+            # Check if this looks like a title
+            # Titles often have certain patterns
+            
+            # If it contains a dash with system name, it might be formatted title
+            if ' - ' in line_clean:
+                parts = line_clean.split(' - ', 1)
+                if len(parts) == 2:
+                    system_part, title_part = parts
+                    # If first part is a system name, use the second part
+                    if system_part.upper() in ['TEAMS', 'OUTLOOK', 'SIAN', 'SMIA', 'KOSS', 'SHAREPOINT', 'ONEDRIVE', 'MOBIL', 'WINDOWS', 'MAC', 'IPHONE']:
+                        return title_part.strip()
+                    else:
+                        return line_clean  # Use the whole line
+            
+            # If it's a reasonable length and appears early, it's likely a title
+            if i < 10:  # Within first 10 lines
+                return line_clean
+    
+    # If no good title found, try to find anything reasonable
+    for line in cleaned_lines[:5]:  # Just check first 5 lines
+        if 3 <= len(line) <= 100:
+            return line
+    
+    return "Untitled"
 
 def rename_pdfs_with_headers():
     """Rename all PDF files to use their article titles"""
@@ -83,22 +165,19 @@ def rename_pdfs_with_headers():
             
         print(f"\n📁 Processing {folder_name} folder ({len(pdf_files)} files)")
         
-        # Initialize organizer for this folder
-        organizer = SystemBasedPDFOrganizer(str(folder))
-        
         renamed_in_folder = 0
         
         for pdf_file in pdf_files:
             total_files += 1
             
             try:
-                # Extract header/content
-                content = organizer.extract_pdf_header(pdf_file)
+                # Extract article title directly
+                article_title = extract_article_title(pdf_file)
                 
                 # Generate clean filename
-                new_name = clean_filename(content)
+                new_name = clean_filename(article_title)
                 
-                # Add system prefix for clarity
+                # Add system prefix for clarity (avoid duplication)
                 if not new_name.upper().startswith(folder_name.upper()):
                     new_name = f"{folder_name} - {new_name}"
                 
