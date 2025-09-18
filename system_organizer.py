@@ -290,43 +290,36 @@ def main():
     print("=" * 40)
     print("Organizes PDFs by system/application name (OneDrive, Teams, Outlook, etc.)")
     
-    # Default to PDF splitt folder
-    downloads_dir = Path.home() / "Downloads"
+    # Ask user for source folder
+    print("\n📂 Please provide the path to your PDF folder:")
+    print("Examples:")
+    print("  Windows: C:\\Users\\YourName\\Documents\\PDFs")
+    print("  Mac:     /Users/YourName/Documents/PDFs")
+    print("  Or drag and drop the folder here and press Enter")
     
-    # Check if files are in organized_by_content folder
-    content_organized_dir = downloads_dir / "PDF splitt" / "organized_by_content"
-    original_dir = downloads_dir / "PDF splitt"
-    
-    if content_organized_dir.exists():
-        print(f"\n📁 Found previously organized content in: {content_organized_dir}")
-        choice = input("Reorganize from:\n1. Original PDF splitt folder\n2. Previously organized content folders\nChoose (1/2): ").strip()
+    while True:
+        user_input = input("\nEnter folder path: ").strip()
         
-        if choice == "2":
-            source_dir = content_organized_dir
-            print(f"📂 Using: {source_dir}")
-            
-            # We need to collect all PDFs from all subfolders
-            print("Collecting PDFs from all content folders...")
-            temp_dir = downloads_dir / "temp_collected_pdfs"
-            temp_dir.mkdir(exist_ok=True)
-            
-            # Move all PDFs to temp directory first
-            for subfolder in content_organized_dir.iterdir():
-                if subfolder.is_dir():
-                    for pdf_file in subfolder.glob("*.pdf"):
-                        shutil.move(str(pdf_file), str(temp_dir / pdf_file.name))
-            
-            source_dir = temp_dir
+        # Remove quotes if user added them
+        user_input = user_input.strip('"\'')
+        
+        # Convert to Path object
+        source_dir = Path(user_input)
+        
+        if source_dir.exists() and source_dir.is_dir():
+            print(f"✅ Found folder: {source_dir}")
+            break
         else:
-            source_dir = original_dir
-    else:
-        source_dir = original_dir
+            print(f"❌ Folder not found: {source_dir}")
+            print("Please check the path and try again.")
     
-    print(f"📁 Source directory: {source_dir}")
-    
-    if not source_dir.exists():
-        print(f"❌ Error: Directory '{source_dir}' does not exist!")
+    # Check if there are any PDFs in the folder
+    pdf_files = list(source_dir.glob("*.pdf")) + list(source_dir.glob("*.PDF"))
+    if not pdf_files:
+        print(f"❌ No PDF files found in: {source_dir}")
         return
+    
+    print(f"📄 Found {len(pdf_files)} PDF files")
     
     # Initialize organizer
     organizer = SystemBasedPDFOrganizer(str(source_dir))
@@ -350,14 +343,6 @@ def main():
         organizer.organize_files(dry_run=True)
     else:
         print("❌ Organization cancelled.")
-    
-    # Clean up temp directory if it was created
-    temp_dir = downloads_dir / "temp_collected_pdfs"
-    if temp_dir.exists() and choice == "2":
-        try:
-            shutil.rmtree(temp_dir)
-        except:
-            print(f"Note: Please manually remove temp directory: {temp_dir}")
 
 if __name__ == "__main__":
     main()

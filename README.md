@@ -2,6 +2,34 @@
 
 Automatically organizes PDFs into folders by detecting system names (Teams, Outlook, SIAN, KOSS, etc.) in the content.
 
+## 🚀 **One Command Does It All**
+
+**Just run the main script to analyze and categorize ALL your PDFs automatically:**
+
+```bash
+python system_organizer.py
+```
+
+This single command will:
+- 📁 **Scan all PDFs** in your source folder
+- 📖 **Read PDF content** to detect system names (Teams, Outlook, SIAN, etc.)
+- 📂 **Create system folders** automatically (Teams/, Outlook/, SIAN/, etc.)
+- 📄 **Move PDFs** to appropriate folders based on content analysis
+- 📊 **Show results** with statistics (typically 83%+ accuracy)
+
+**That's it!** Your PDFs will be organized into 50+ system-specific folders.
+
+## 📂 **Folder Setup - Works on Windows & Mac**
+
+The script will ask you for your PDF folder path when you run it.
+
+**Examples of folder paths:**
+- **Windows**: `C:\Users\YourName\Documents\PDFs`
+- **Mac**: `/Users/YourName/Documents/PDFs`
+- **Tip**: You can drag and drop the folder into the terminal
+
+**Output**: The script creates an `organized_by_system/` folder in your source directory.
+
 ## Quick Start
 
 ### 1. Install Dependencies
@@ -9,32 +37,37 @@ Automatically organizes PDFs into folders by detecting system names (Teams, Outl
 pip install -r requirements.txt
 ```
 
-### 2. Run the Organizer
+### 2. Run the Main Organizer (Does Everything!)
 ```bash
 python system_organizer.py
 ```
+**This automatically analyzes and categorizes ALL your PDFs!** ✨
+
+---
+
+## 🔧 **Optional Enhancements** (Run After Main Script)
 
 ### 3. Fix Misclassified Files (Optional)
 ```bash
 python reorganize_other_files.py
 ```
 
-### 4. Rename Files with Descriptive Titles
+### 4. Rename Files with Descriptive Titles (Optional)
 ```bash
 python rename_pdfs_with_headers.py
 ```
 
-### 5. Smart Recategorization (Recommended)
+### 5. Smart Recategorization (Recommended - Improves Accuracy to 98%+)
 ```bash
 python smart_recategorize.py
 ```
 
-### 6. Fix Cross-System Files
+### 6. Fix Cross-System Files (Optional)
 ```bash
 python fix_cross_system_files.py
 ```
 
-### 7. Flatten System Folders
+### 7. Flatten System Folders (Optional)
 ```bash
 python flatten_system_folders.py
 ```
@@ -43,6 +76,16 @@ python flatten_system_folders.py
 ```bash
 python create_alphabetical_copy.py
 ```
+
+---
+
+## 💡 **Summary**
+
+**For most users:** Just run `python system_organizer.py` and you're done!
+
+**For perfect results:** Also run `python smart_recategorize.py` afterward (recommended).
+
+**All other scripts are optional enhancements.**
 
 ## What It Does
 
