@@ -31,7 +31,7 @@ class SystemBasedPDFOrganizer:
             "Loop", "Copilot", "Authenticator", "Edge", "Chrome", "Firefox",
             "Cisco", "Calendly", "Aurora", "Ventus", "OBI", "Calabrio", "Mattermost",
             "Læringsportalen", "Audit", "Begrepskatalogen", "Lexaurus", "Teamkatalogen",
-            "Argus", "ESS", "Remedy", "Autohotkey", "Pixview", "Databricks", "VPN"
+            "Argus", "ESS", "Remedy", "Autohotkey", "Pixview", "Databricks", "VPN", "MFA"
         ]
         
     def extract_pdf_header(self, pdf_path: Path, max_lines: int = 5) -> str:
@@ -177,7 +177,15 @@ class SystemBasedPDFOrganizer:
             "firmaportal": "Skatteetaten",
             "informasjonsklassifisering": "Microsoft",
             "checkpoint": "VPN",
-            "vpn": "VPN"
+            "vpn": "VPN",
+            "mfa": "MFA",
+            "multi-factor authentication": "MFA",
+            "multifactor authentication": "MFA",
+            "multi factor authentication": "MFA",
+            "two-factor authentication": "MFA",
+            "2fa": "MFA",
+            "totp": "MFA",
+            "authenticator app": "MFA"
         }
         
         for variation, clean_system_name in system_variations.items():
