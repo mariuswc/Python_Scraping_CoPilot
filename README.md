@@ -30,7 +30,7 @@ python simple_alphabetical_organizer.py
 
 ## 📊 What You Get
 
-- **1,977+ organized files** with names like "System - Article Title.pdf"
+- **Organized files** with names like "System - Article Title.pdf"
 - **Alphabetical sorting** by filename (Adobe, Altinn, Teams, etc.)
 - **Automatic cleanup** of weird formats into separate folder
 - **97.7% success rate** for header extraction
